@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  name        String?
+  plan        String   @default("FREE")
+  creditsUsed Int      @default(0)
+  creditsLimit Int     @default(5)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  audits      Audit[]
+}
+
+model Audit {
+  id           String      @id @default(uuid())
+  websiteUrl   String
+  userId       String
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       String      @default("PENDING")
+  pagesScanned Int         @default(0)
+  totalPages   Int         @default(0)
+  score        Int?
+  startedAt    DateTime    @default(now())
+  completedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  pages        Page[]
+  issues       Issue[]
+  recommendations Recommendation[]
+}
+
+model Page {
+  id          String   @id @default(uuid())
+  auditId     String
+  audit       Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  url         String   @db.Text
+  title       String?
+  metaDescription String?
+  h1          String?
+  statusCode  Int?
+  wordCount   Int?
+  loadTime    Float?
+  crawledAt   DateTime @default(now())
+}
+
+model Issue {
+  id           String   @id @default(uuid())
+  auditId      String
+  audit        Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  title        String
+  description  String   @db.Text
+  severity     String
+  category     String
+  impact       String?
+  fixSuggestion String?
+}
+
+model Recommendation {
+  id              String   @id @default(uuid())
+  auditId         String
+  audit           Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  title           String
+  description     String   @db.Text
+  priority        String
+  estimatedImpact String?
+  implementation  String?
+  createdAt       DateTime @default(now())
+}
