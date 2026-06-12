@@ -1,12 +1,6 @@
-import { Queue } from 'bullmq';
-import Redis from 'ioredis';
-
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
-
-export const auditQueue = new Queue('audit-queue', { connection });
-
+// Mock queue for Vercel serverless (no Redis required)
 export const addAuditToQueue = async (auditId: string, websiteUrl: string, userId: string) => {
-  // In serverless, you'd need an external worker. For now, just log.
-  console.log(`Job queued: ${auditId} ${websiteUrl}`);
+  console.log(`[Mock Queue] Job received: ${auditId} for ${websiteUrl}`);
+  // In serverless, you'd need a separate worker or external queue service
   return { id: 'mock-job-id' };
 };
